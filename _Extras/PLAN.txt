@@ -1,0 +1,30 @@
+aMazement
+stuff yeah.
+
+Tone - Smooth and colorful
+
+Screens:
+SplashScreen.java
+MenuScreen.java
+PlayScreen.java
+
+logo and stuff >
+menu with Play and Get Full Version > links to store
+	choose size
+	play screen>
+playing screen with maze then when finish\/ also a "< menu button top right
+		slide down, change color, then slide to
+		next level and show size under
+
+
+colors:
+Text?		Player		Background	MazeWall
+xxx, 42, 98		xxx, 52, 97		xxx, 57, 87		xxx, 50, 57		xxx, 29, 27
+H S B
+168, 42, 98		154, 52, 97		150, 57, 87		145, 50, 57		78, 29, 27
+183, 42, 98		169, 52, 97		
+
+
+	
+
+
