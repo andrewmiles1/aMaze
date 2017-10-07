@@ -1,6 +1,7 @@
 package com.burnt_toast.amazement;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -52,11 +53,14 @@ public class ScreenFadeTool {
 			tempBatch.setColor(tempBatch.getColor().r, 
 					tempBatch.getColor().g, tempBatch.getColor().b, fadeFactor);
 		}
-		if(t.getClass() == BitmapFont.class) {
+		else if(t.getClass() == BitmapFont.class) {
 			//if bitmap font
 			tempFont = (BitmapFont)t;
 			tempFont.setColor(tempFont.getColor().r,
 					tempFont.getColor().g, tempFont.getColor().b, fadeFactor);
+		}
+		else if(t.getClass() == Color.class) {
+			((Color)t).a = fadeFactor;
 		}
 		return "NONE";
 	}
@@ -69,6 +73,13 @@ public class ScreenFadeTool {
 		fadeCode = passFadeCode;
 		if(fadeOut)fadeOut = false;
 		fadeOut = true;//make sure that it's set to fade out
+	}
+	/**
+	 * I made this so that using the fade in the clear method for 
+	 * @return the amount of fade in float from 0-1 0 being black and 1 being not.
+	 */
+	public static float getFadeFactor() {
+		return fadeFactor;
 	}
 
 }

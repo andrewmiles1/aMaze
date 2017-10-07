@@ -18,13 +18,19 @@ playing screen with maze then when finish\/ also a "< menu button top right
 
 
 colors:
-Text?		Player		Background	MazeWall
-xxx, 42, 98		xxx, 52, 97		xxx, 57, 87		xxx, 50, 57		xxx, 29, 27
+Player			Text			Nothing			Background		Wall
+ACTUALLY
+Player			Text			Nothing			Wall			Nothing		Background
+xxx, 42, 98		xxx, 52, 97		xxx, 57, 87		xxx, 50, 57		xxx, 29, 27	0, 0, 13
 H S B
 168, 42, 98		154, 52, 97		150, 57, 87		145, 50, 57		78, 29, 27
 183, 42, 98		169, 52, 97		
 
-
+x/255
+13/100
 	
-
-
+TEXTURE COORDINATES
+Player: 0, 53 - 50 x 50
+Logo: 0, 0 - 275 x 53
+wall color: 0, 103 - 1 x 1
+player shine: 50, 53 - 94 x 94
