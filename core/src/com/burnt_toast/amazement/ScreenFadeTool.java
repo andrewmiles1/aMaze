@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class ScreenFadeTool {
 	private static boolean fadeIn;
 	private static boolean fadeOut;
-	private static float fadeTimer;//transparency amount from 0 to 1
-	private static float fadeFactor = 2;
+	private static float fadeTracker;//transparency amount from 0 to 1
+	private static float fadeFactor = 1.5f;
 	private static String fadeCode;
 	private static SpriteBatch tempBatch;
 	private static BitmapFont tempFont;
@@ -19,6 +19,29 @@ public class ScreenFadeTool {
 		//otherwise return false.
 		return (fadeIn || fadeOut)? true:false;
 	}
+	public static String updateFade() {
+		if(fadeIn) {
+			if(fadeTracker <1) {
+				fadeTracker += fadeFactor * Gdx.graphics.getDeltaTime();
+			}
+			if(fadeTracker > 1) {
+				fadeTracker = 1;
+				fadeIn = false;
+				return fadeCode;
+			}
+		}
+		else if(fadeOut) {
+			if(fadeTracker > 0) {
+				fadeTracker -= fadeFactor * Gdx.graphics.getDeltaTime();
+			}
+			else if(fadeTracker < 0) {
+				fadeTracker = 0;
+				fadeOut = false;
+				return fadeCode;
+			}
+		}
+		return "none lol";
+	}
 	/**
 	 * updates the alpha/color to the font or batch you pass to it
 	 * to effectively fade.
@@ -26,43 +49,24 @@ public class ScreenFadeTool {
 	 * @return returns the 'fade code' you entered when you told it to fade,
 	 *  So you know what to do when done. Returns "NONE" if no fade code.
 	 */
-	public static <T> String updateFade(T t) {
-		if(fadeIn) {
-			if(fadeTimer <1) {
-				fadeTimer += fadeFactor * Gdx.graphics.getDeltaTime();
-			}
-			else if(fadeTimer >= 1) {
-				fadeTimer = 1;
-				fadeIn = false;
-				return fadeCode;
-			}
-		}
-		else if(fadeOut) {
-			if(fadeTimer > 0) {
-				fadeTimer -= fadeFactor * Gdx.graphics.getDeltaTime();
-			}
-			else if(fadeTimer < 0) {
-				fadeTimer = 0;
-				fadeOut = false;
-				return fadeCode;
-			}
-		}
+	public static <T> T fadeItem(T t) {
+
 		if(t.getClass() == SpriteBatch.class) {
 			//if sprite batch
 			tempBatch = (SpriteBatch)t;
 			tempBatch.setColor(tempBatch.getColor().r, 
-					tempBatch.getColor().g, tempBatch.getColor().b, fadeFactor);
+					tempBatch.getColor().g, tempBatch.getColor().b, fadeTracker);
 		}
 		else if(t.getClass() == BitmapFont.class) {
 			//if bitmap font
 			tempFont = (BitmapFont)t;
 			tempFont.setColor(tempFont.getColor().r,
-					tempFont.getColor().g, tempFont.getColor().b, fadeFactor);
+					tempFont.getColor().g, tempFont.getColor().b, fadeTracker);
 		}
 		else if(t.getClass() == Color.class) {
-			((Color)t).a = fadeFactor;
+			((Color)t).a = fadeTracker;
 		}
-		return "NONE";
+		return null;
 	}
 	public static void fadeIn(String passFadeCode) {
 		fadeCode = passFadeCode;
@@ -78,8 +82,6 @@ public class ScreenFadeTool {
 	 * I made this so that using the fade in the clear method for 
 	 * @return the amount of fade in float from 0-1 0 being black and 1 being not.
 	 */
-	public static float getFadeFactor() {
-		return fadeFactor;
-	}
+	public static float getFadeTracker() {return fadeTracker;}
 
 }

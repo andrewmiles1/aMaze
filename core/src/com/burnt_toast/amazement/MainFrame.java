@@ -3,13 +3,17 @@ package com.burnt_toast.amazement;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 public class MainFrame extends Game {
 	public static SpriteBatch batch;//le batch yo
@@ -34,18 +38,24 @@ public class MainFrame extends Game {
 	
 	private static float hue;
 	
+	//Sound stuff
+	public static Sound completionSound;
+	public static Sound clickSound;
+	//loading sound?
+	
 	//SCREENS
 	MenuScreen menuScr;
 	PlayScreen playScr;
 	
 	//Font and tools
+	public static BitmapFont gameFontSmall;//the smaller version.
 	public static BitmapFont gameFont;
 	public GlyphLayout glyphLayout;
 	public FreeTypeFontGenerator generator;
 	public FreeTypeFontParameter parameter;//used for loading fonts
 	
 	//Textures
-	public Texture gameTexture;
+	public static Texture gameTexture;
 	
 	public MainFrame(){
 		//load colors
@@ -70,7 +80,14 @@ public class MainFrame extends Game {
 		parameter = new FreeTypeFontParameter();
 		parameter.size = 50;//FIXME will probably need bigger font size
 		gameFont = generator.generateFont(parameter);//generate font manually
+		parameter.size = 25;
+		gameFontSmall = generator.generateFont(parameter);
 		
+		//sounds
+		completionSound = Gdx.audio.newSound(Gdx.files.internal("successSound.wav"));
+		clickSound = Gdx.audio.newSound(Gdx.files.internal("clickSound.wav"));
+		
+		//textures
 		gameTexture = new Texture(Gdx.files.internal("MainTexture.png"));
 		
 		//load textures
@@ -78,7 +95,11 @@ public class MainFrame extends Game {
 		
 		//load sounds
 		
+		
 		//loads screens
+//		OrthographicCamera cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//		cam.position.set(cam.viewportWidth / 2f, cam.viewportHeight / 2f, 0);
+//		cam.update();
 		menuScr = new MenuScreen(this);
 		playScr = new PlayScreen(this);
 		this.setScreen(menuScr);
@@ -138,7 +159,6 @@ public class MainFrame extends Game {
 		assignColor.r = r/255.0f;
 		assignColor.g = g/255.0f;
 		assignColor.b = b/255.0f;
-		assignColor.a = 1;
 		//return new Color(r / 255.0f, g / 255.0f, b / 255.0f, 1);
 	}
 	public static void changeColor() {
@@ -147,20 +167,25 @@ public class MainFrame extends Game {
 		HSVtoRGB(textColor, hue, 52, 97);
 		HSVtoRGB(logoColor, hue, 57, 87);
 		HSVtoRGB(wallColor, hue, 50, 57);
+		HSVtoRGB(playerColor, hue, 42, 98);
 		outputColor(textColor);
 	}
 	public static void drawingPlayer() {
+		playerColor.a = batch.getColor().a;
 		batch.setColor(playerColor);
 	}
 	public static void drawingWalls() {
+		wallColor.a = batch.getColor().a;
 		batch.setColor(wallColor);
 	}
 	public static void drawingText() {
-
+		textColor.a = batch.getColor().a;
 		gameFont.setColor(textColor);
+		gameFontSmall.setColor(textColor);
 		batch.setColor(textColor);
 	}
 	public static void drawingLogo() {
+		logoColor.a = batch.getColor().a;
 		batch.setColor(logoColor);
 	}
 	private static void outputColor(Color col) {
@@ -170,17 +195,18 @@ public class MainFrame extends Game {
 		System.out.println("B:" + col.b);
 		System.out.println("A:" + col.a);
 	}
-	/**
-	 * copies color TWO to color ONE. 2 > 1
-	 * @param col1 Color 1
-	 * @param col2 Color 2
-	 */
-	private static void copyFromColor(Color col1, Color col2) {
-		col1.a = col2.a;
-		col1.b = col2.b;
-		col1.g = col2.g;
-		col1.r = col2.r;
+	
+	public static float distForm(float x1, float y1, float x2, float y2){
+		return (float) Math.sqrt(Math.abs(Math.pow(x2 - x1, 2) + (Math.pow(y2 - y1, 2))));
 	}
+	public static float distForm(Vector3 position, Vector2 vect2) {
+		return distForm(position.x, position.y, vect2.x, vect2.y);
+	}
+	public static float distForm(Vector2 position, Vector2 vect2) {
+		return distForm(position.x, position.y, vect2.x, vect2.y);
+	}
+	
+	
 	
 	
 }

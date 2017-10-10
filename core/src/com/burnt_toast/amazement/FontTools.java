@@ -14,5 +14,14 @@ public class FontTools {
 		glyphLayout.setText(MainFrame.gameFont, str);
 		return glyphLayout.width;
 	}
+	
+	public static float getHeightOfSmall(String str){
+		glyphLayout.setText(MainFrame.gameFontSmall, str);
+		return glyphLayout.height;
+	}
+	public static float getWidthOfSmall(String str){
+		glyphLayout.setText(MainFrame.gameFontSmall, str);
+		return glyphLayout.width;
+	}
 
 }
