@@ -30,13 +30,10 @@ public class MenuScreen implements Screen, InputProcessor{
 	
 	
 	//single play stuff
-	private MazeGenerator mazeGen;
-	private int[][] currentMaze;
+	private Maze currentMaze;
 	private TextureRegion wallPixel;
 	private float normalTileScale;
-	private float currentLvTileSize;
 	private Player player;
-	private Vector2 mazePos;//bottom left coords of maze
 	private Rectangle backButton;
 	
 	//messy which screen I'm drawing system.
@@ -78,11 +75,10 @@ public class MenuScreen implements Screen, InputProcessor{
 		screenTransTool = new ScreenTransitionTool(orthoCam);
 		
 		//single player play stuff
-		mazeGen = new MazeGenerator();
 		wallPixel = new TextureRegion(MainFrame.gameTexture, 0, 103, 1, 1);
-		normalTileScale = 20;
-		player = new Player();
-		mazePos = new Vector2();
+		currentMaze = new Maze(wallPixel);
+		normalTileScale = 30;
+		player = new Player(currentMaze);
 		backButton = new Rectangle();
 		//I'm not using the small font tools because I want the boundries to click on it 
 		//to be large enough that it will register when you hit it.
@@ -95,7 +91,7 @@ public class MenuScreen implements Screen, InputProcessor{
 	}
 	
 	public float getBlockSizeForLv(int mazeSize) {
-		if(true /*mazeSize * normalTileScale > Gdx.graphics.getWidth()*/) {
+		if(mazeSize * normalTileScale > Gdx.graphics.getWidth()) {
 			return Gdx.graphics.getWidth()/mazeSize;
 		}
 		else {
@@ -158,24 +154,14 @@ public class MenuScreen implements Screen, InputProcessor{
 		if(currentLayouts.contains("splay")) {//single player mode, playing screen
 			//[row - x][column - y] I think.
 			MainFrame.drawingText();
-			MainFrame.gameFont.draw(MainFrame.batch, (currentMaze.length-2) + " x " + (currentMaze.length-2),
-					singlePlayRefPoint.x+ Gdx.graphics.getWidth()/2-FontTools.getWidthOf((currentMaze.length-2) + " x " + (currentMaze.length-2))/2,
-					singlePlayRefPoint.y+ (Gdx.graphics.getHeight() - currentMaze.length * currentLvTileSize)/2 -
-					FontTools.getHeightOf((currentMaze.length-2) + " x " + (currentMaze.length-2)));
+			MainFrame.gameFont.draw(MainFrame.batch, (currentMaze.getSize()-2) + " x " + (currentMaze.getSize()-2),
+					singlePlayRefPoint.x+ Gdx.graphics.getWidth()/2-FontTools.getWidthOf((currentMaze.getSize()-2) + " x " + (currentMaze.getSize()-2))/2,
+					singlePlayRefPoint.y+ (Gdx.graphics.getHeight() - currentMaze.getSize() * currentMaze.tileSize)/2 -
+					FontTools.getHeightOf((currentMaze.getSize()-2) + " x " + (currentMaze.getSize()-2)));
 			MainFrame.gameFontSmall.draw(MainFrame.batch, "< Save and go back", 2, FontTools.getHeightOf("< Save and go back"));
-			MainFrame.drawingWalls();
-			for(int i = 0; i < currentMaze.length; i++) {//row
-				for(int k = 0; k < currentMaze[0].length; k++) {//column
-					if(currentMaze[i][k] == 1) {
-						MainFrame.batch.draw(wallPixel,// singlePlayRefPoint.x + i * currentLvTileSize, singlePlayRefPoint.y + k * currentLvTileSize,
-						mazePos.x + currentLvTileSize*i,//mmmm ain't that nice.
-						mazePos.y + currentLvTileSize*k,//these two lines used to look super long and ugly. See where mazePos is set in touchDown
-						currentLvTileSize, currentLvTileSize);
-					}
-				}
-			}//end double for
+			currentMaze.draw(MainFrame.batch);
 			MainFrame.drawingPlayer();
-			player.draw(currentLvTileSize);
+			player.draw();
 		}
 		MainFrame.batch.end();
 		//INPUT
@@ -254,14 +240,12 @@ public class MenuScreen implements Screen, InputProcessor{
 				System.out.println("Didn't drag.");
 				levelSelectDisplay.playerDragged(0);
 				screenTransTool.start("splay", 'r');
-				//screenTransTool.sendToBotLeft(singlePlayRefPoint.x, singlePlayRefPoint.y);
-				//currentLayouts = currentLayouts.concat("splay");//now it draws both as it transitions! So cool.
-				currentMaze = mazeGen.generateMaze(levelSelectDisplay.getNumber()+1);
-				currentLvTileSize = getBlockSizeForLv(currentMaze.length);
+				currentMaze.createMaze(levelSelectDisplay.getNumber(), getBlockSizeForLv(levelSelectDisplay.getNumber()));
 				
-				mazePos.x = singlePlayRefPoint.x+Gdx.graphics.getWidth()/2-currentLvTileSize*currentMaze.length/2;
-				mazePos.y = singlePlayRefPoint.y+Gdx.graphics.getHeight()-Gdx.graphics.getWidth()/2-currentLvTileSize*currentMaze.length/2;
-				player.setPos(mazePos.x + currentLvTileSize, mazePos.y + currentLvTileSize);
+				currentMaze.setPosX(Gdx.graphics.getWidth()/2-currentMaze.getTotalSize()/2);
+				currentMaze.setPosY(Gdx.graphics.getHeight()-Gdx.graphics.getWidth()/2-currentMaze.tileSize*currentMaze.getSize()/2);
+				player.setPos(currentMaze.getStartingPosX(), currentMaze.getStartingPosY());
+				player.setSize(currentMaze.tileSize);
 			}
 			
 			dragDeadCounter = 0;
@@ -281,12 +265,18 @@ public class MenuScreen implements Screen, InputProcessor{
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		if(currentLayouts.contains("single")) {
-			dragDeadCounter += MainFrame.distForm(touchDownPoint.x, touchDownPoint.y, screenX, screenY);
-			if(dragDeadCounter >= dragDeadZone) {//passed threshold, we're dragging.
+			if(Gdx.input.getDeltaX() > 0) {
+				dragDeadCounter += MainFrame.distForm(touchDownPoint.x, touchDownPoint.y, screenX, screenY);
+			}
+			else {
+				dragDeadCounter -= MainFrame.distForm(touchDownPoint.x, touchDownPoint.y, screenX, screenY);
+			}
+			
+			if(Math.abs(dragDeadCounter) >= dragDeadZone) {//passed threshold, we're dragging.
+
 				dragThisTouch = true;
 			}
-			if(dragThisTouch && Gdx.input.getDeltaX() > 20) {
-	
+			if(dragThisTouch && Math.abs(Gdx.input.getDeltaX()) > 1) {
 				levelSelectDisplay.playerDragged(Gdx.input.getDeltaX());
 			}
 		}

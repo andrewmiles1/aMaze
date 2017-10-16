@@ -137,7 +137,12 @@ public class FadeNumDisplay {
 		
 	}
 	public void update() {
-		if(!Gdx.input.isTouched()) {
+		if(Gdx.input.isTouched()) {
+			if(Gdx.input.getDeltaX() < 1) {
+				dragSpeed = 0;
+			}
+		}
+		else {//if screen isn't being touched right now
 			if(dragSpeed > 0) {
 			playerDragged(dragSpeed * Gdx.graphics.getDeltaTime());
 			dragSpeed -= getDeaccel();
