@@ -26,7 +26,6 @@ public class MenuScreen implements Screen, InputProcessor{
 	private float dragDeadZone;
 	private boolean dragThisTouch;
 	private Vector3 touchDownPoint;
-	private String currentLayout;//this is just to test what layout to draw, since it's all on the same screen.
 	
 	
 	//single play stuff
@@ -208,11 +207,12 @@ public class MenuScreen implements Screen, InputProcessor{
 
 	@Override
 	public boolean keyDown(int keycode) {
-		if(currentLayout == "splay") {
+		if(currentLayouts.contains("splay")) {
 			if(keycode == Keys.BACK) {
 				screenTransTool.start("main", 'l');
 			}
 		}
+		
 		return false;
 	}
 

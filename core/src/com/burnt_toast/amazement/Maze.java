@@ -50,9 +50,10 @@ public class Maze {
 					maze[i][k] = 2;
 				}
 			}
-		}
+		}//end double for
 		//set the visibility here
-	}
+	}//end create maze
+	
 	public void activateBlock(int xInd, int yInd) {
 		
 	}
@@ -89,7 +90,7 @@ public class Maze {
 			}
 			return false;
 		}
-	}
+	}//end check vis
 	
 	/**
 	 * @return returns only the tile size of the maze
