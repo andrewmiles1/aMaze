@@ -49,17 +49,25 @@ public class Player {
 	 * @param factor
 	 * @return
 	 */
-	public float round(float num, float factor) {
+	public float round(float num, float factor, int direction) {
 		tempFl = factor;
 		//this gets the tempFl to the least greatest multiple of the factor
 		//thats greater than it
 		while(tempFl < num)tempFl+= factor;
+		if(direction > 0) {
+			return tempFl;
+		}
+		else {
+			return (tempFl - factor);
+		}
+		/*
 		if(tempFl-num < num-(tempFl-factor)) {
 			return tempFl;
 		}
 		else {
 			return (tempFl-factor);
 		}
+		*/
 	}
 	
 	public void drag() {
@@ -92,19 +100,17 @@ public class Player {
 					
 					//THE BELOW CODE DOESN'T WORK. Because it's using the bottom left position for the player.
 					//check if we passed the mark
-					if((position.y - maze.position.y) > round(position.y - maze.position.y, tileSize)) {
+					if((position.y+tileSize - maze.position.y) > round(position.y+tileSize - maze.position.y, tileSize, 1)) {
 						//if the position relative to maze.y is bigger than our target position to get to,
 						//if we've passed the mark
-						position.y = maze.position.y + round(position.y - maze.position.y, tileSize);
+						position.y = maze.position.y + round(position.y+tileSize - maze.position.y, tileSize, 1) - tileSize;
 						//then set it there. Holy crap I'm way too lazy to explain that logic but yeah.
 						//hopefully that's not code that's too hard to read.
 					}
 					//THE ABOVE CODE DOESN'T WORK
-					
 					break;
 				case 3://move negative on opposite axis
-					position.y -= tempFl;
-
+					//position.y -= tempFl;
 					break;
 				//NOTICE there's not a case 1: becasue don't do anything
 					//if that's the case.
@@ -138,7 +144,7 @@ public class Player {
 	 * 2 = partial collision to move in the opposite axis POSITIVE direction
 	 * 3 = partial collision to move in the opposite axis NEGATIVE direction
 	 */
-	private int checkCollision(char direction, float distance) {
+	public int checkCollision(char direction, float distance) {
 		//1 2
 		//4 8 adding values for each corner
 		tempInt = 0;//each corner added to see what hit.
@@ -155,29 +161,35 @@ public class Player {
 		if(direction == 'u' || direction == 'l') {//upper left corner
 			if(maze.checkCollisionAndVis(tempPos.x, tempPos.y+tileSize)) {
 				tempInt += 1;//top left corner value, cause DID collide
+				System.out.println("!"+tempInt);
 			}
 			//upper left corner
 		}
 		if(direction == 'u' || direction == 'r') {//upper right corner
 			if(maze.checkCollisionAndVis(position.x+tileSize, position.y+tileSize)) {
 				tempInt += 2;//top right corner value, cause DID collide
+				System.out.println("!"+tempInt);
 			}
 			//upper right corner
 		}
 		if(direction == 'd' || direction == 'r') {//lower right corner
 			if(maze.checkCollisionAndVis(position.x+tileSize, position.y)) {
 				tempInt += 8;//lower right corner value, cause DID collide.
+				System.out.println("!"+tempInt);
 			}
 			//lower right corner
 		}
 		if(direction == 'd' || direction == 'l') {//lower left corner
 			if(maze.checkCollisionAndVis(position.x, position.y)) {
 				tempInt += 4;//lower left corner value, cause DID collide.
+				System.out.println("!"+tempInt);
 			}
 			//lower left corner.
 		}
+
 		switch(tempInt) {
 		//parshal collision values
+
 		case 1:
 			//only top left corner collided
 			if(direction == 'u')return 2;
@@ -201,7 +213,7 @@ public class Player {
 		//totally collided cases:
 		case 3: case 10: case 12: case 5:
 			//completely collided.
-			return 1;
+			return tempInt;
 		//totally didn't collide.
 		case 0:
 			//no collision

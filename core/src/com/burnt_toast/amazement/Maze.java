@@ -36,8 +36,8 @@ public class Maze {
 	public void setPosY(float y) {
 		position.y = y;
 	}
-	public float getX() { return position.y; }
-	public float getY() { return position.x; }
+	public float getX() { return position.x; }
+	public float getY() { return position.y; }
 	
 	public void createMaze(int size, float tileSize) {
 		maze = mazeGen.generateMaze(size+1);
@@ -57,17 +57,19 @@ public class Maze {
 	public void activateBlock(int xInd, int yInd) {
 		
 	}
-	
+	public boolean checkCollisionAndVis(float x, float y) {
+		return checkCollisionAndVis((int)x, (int)y);
+	}
 	/**
 	 * checks the collision of x and y, and also changes visibility for pos
 	 * @param x of player
 	 * @param y of player
 	 * @return true if collided, false if not.
 	 */
-	public boolean checkCollisionAndVis(float x, float y) {
+	public boolean checkCollisionAndVis(int x, int y) {
 		//places x and y relative to 0,0 from maze pos
-		x -= position.x;
-		y -= position.y;
+		x -= (int)position.x;
+		y -= (int)position.y;
 		//so then I can set to what maze index they're in
 		x = (int)(x / tileSize);
 		y = (int)(y / tileSize);
@@ -75,6 +77,7 @@ public class Maze {
 		//so now we check the array representation
 		temp = maze[(int)x][(int)y];
 		if(temp == 1) {
+			System.out.println("Collision?");
 			return true;//collided.
 		}
 		else {
@@ -87,6 +90,7 @@ public class Maze {
 				//we're never checking from the walls. If that makes sense.
 				activateBlock((int)x, (int)y);
 				//it has invisible neighbors, so activate the block.
+				System.out.println(x + ", " + y);
 			}
 			return false;
 		}
@@ -129,4 +133,6 @@ public class Maze {
 	public int[][] getIntArray() {
 		return maze;
 	}
+
+
 }

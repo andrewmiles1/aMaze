@@ -211,6 +211,11 @@ public class MenuScreen implements Screen, InputProcessor{
 			if(keycode == Keys.BACK) {
 				screenTransTool.start("main", 'l');
 			}
+			if(keycode == Keys.A) {
+				System.out.println(player.checkCollision('r', 1));
+				System.out.println("x" + player.getPos().x + " " + currentMaze.getX() + " " + currentMaze.tileSize);
+				System.out.println("y" + player.getPos().y + " " + currentMaze.getY() + " " + currentMaze.tileSize);
+			}
 		}
 		
 		return false;
