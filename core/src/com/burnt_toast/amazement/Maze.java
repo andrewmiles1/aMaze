@@ -57,7 +57,7 @@ public class Maze {
 	public void activateBlock(int xInd, int yInd) {
 		
 	}
-	public boolean checkCollisionAndVis(float x, float y) {
+	public boolean checkCollisionAndVis(int x, int y) {
 		return checkCollisionAndVis((int)x, (int)y);
 	}
 	/**
@@ -66,16 +66,28 @@ public class Maze {
 	 * @param y of player
 	 * @return true if collided, false if not.
 	 */
-	public boolean checkCollisionAndVis(int x, int y) {
+	public boolean checkCollisionAndVis(float x, float y, char direction) {
 		//places x and y relative to 0,0 from maze pos
 		x -= (int)position.x;
 		y -= (int)position.y;
+		//check to see if it's right at the walls edge
+		//ok so these are if the thing lands RIGHT ON the next wall.
+		//for going right or going up only.
+		if(direction == 'r' && x % tileSize == 0) {
+			x -= 0.1;
+		}
+		if(direction == 'u' && y % tileSize == 0) {
+			y -= 0.1;
+		}
 		//so then I can set to what maze index they're in
-		x = (int)(x / tileSize);
-		y = (int)(y / tileSize);
+		//try rounding x and y up before dividing. I'm still getting hashing issues.
+		x = (((int)x) / tileSize);
+		y = (((int)y) / tileSize);
 		//bam basically just hashed map that baby.
 		//so now we check the array representation
+		
 		temp = maze[(int)x][(int)y];
+		System.out.println(x + ", " + y);
 		if(temp == 1) {
 			System.out.println("Collision?");
 			return true;//collided.
@@ -90,7 +102,7 @@ public class Maze {
 				//we're never checking from the walls. If that makes sense.
 				activateBlock((int)x, (int)y);
 				//it has invisible neighbors, so activate the block.
-				System.out.println(x + ", " + y);
+
 			}
 			return false;
 		}

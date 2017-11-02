@@ -54,6 +54,14 @@ public class Player {
 		//this gets the tempFl to the least greatest multiple of the factor
 		//thats greater than it
 		while(tempFl < num)tempFl+= factor;
+		if(direction == 0) {
+			if(tempFl - factor < factor/2) {
+				direction = 1;
+			}
+			else {
+				direction = -1;
+			}
+		}
 		if(direction > 0) {
 			return tempFl;
 		}
@@ -100,7 +108,7 @@ public class Player {
 					
 					//THE BELOW CODE DOESN'T WORK. Because it's using the bottom left position for the player.
 					//check if we passed the mark
-					if((position.y+tileSize - maze.position.y) > round(position.y+tileSize - maze.position.y, tileSize, 1)) {
+					if((position.y+tileSize - maze.position.y + tempFl) >= round(position.y+tileSize - maze.position.y, tileSize, 1)) {
 						//if the position relative to maze.y is bigger than our target position to get to,
 						//if we've passed the mark
 						position.y = maze.position.y + round(position.y+tileSize - maze.position.y, tileSize, 1) - tileSize;
@@ -159,28 +167,28 @@ public class Player {
 		//tile size in any calculations is to get to the corners
 		//it's the substitute for the player size.
 		if(direction == 'u' || direction == 'l') {//upper left corner
-			if(maze.checkCollisionAndVis(tempPos.x, tempPos.y+tileSize)) {
+			if(maze.checkCollisionAndVis(tempPos.x, tempPos.y+tileSize, direction)) {
 				tempInt += 1;//top left corner value, cause DID collide
 				System.out.println("!"+tempInt);
 			}
 			//upper left corner
 		}
 		if(direction == 'u' || direction == 'r') {//upper right corner
-			if(maze.checkCollisionAndVis(position.x+tileSize, position.y+tileSize)) {
+			if(maze.checkCollisionAndVis(position.x+tileSize, position.y+tileSize, direction)) {
 				tempInt += 2;//top right corner value, cause DID collide
 				System.out.println("!"+tempInt);
 			}
 			//upper right corner
 		}
 		if(direction == 'd' || direction == 'r') {//lower right corner
-			if(maze.checkCollisionAndVis(position.x+tileSize, position.y)) {
+			if(maze.checkCollisionAndVis(position.x+tileSize, position.y, direction)) {
 				tempInt += 8;//lower right corner value, cause DID collide.
 				System.out.println("!"+tempInt);
 			}
 			//lower right corner
 		}
 		if(direction == 'd' || direction == 'l') {//lower left corner
-			if(maze.checkCollisionAndVis(position.x, position.y)) {
+			if(maze.checkCollisionAndVis(position.x, position.y, direction)) {
 				tempInt += 4;//lower left corner value, cause DID collide.
 				System.out.println("!"+tempInt);
 			}
@@ -211,7 +219,12 @@ public class Player {
 			if(direction == 'r')return 2;
 			break;
 		//totally collided cases:
-		case 3: case 10: case 12: case 5:
+		
+		case 10: 
+			position.x = maze.getX() + round(position.x-maze.getX(), maze.tileSize, 0);
+		case 3:
+			//position.y = maze.getY() + round(position.y-maze.getY(), maze.tileSize, 0);
+		case 12: case 5:
 			//completely collided.
 			return tempInt;
 		//totally didn't collide.
