@@ -52,7 +52,8 @@ public class MenuScreen implements Screen, InputProcessor{
 	
 	public MenuScreen(MainFrame main){
 		logoImg = new TextureRegion(main.gameTexture, 0, 0, 275, 53);
-		levelSelectDisplay = new FadeNumDisplay("< ~ x ~ >", 5, Gdx.graphics.getWidth()/2-2, MainFrame.clickSound);
+		//I changed the max to 200 because anything bigger was outrageous.
+		levelSelectDisplay = new FadeNumDisplay("< ~ x ~ >", 5, 200, MainFrame.clickSound);
 		
 		dragDeadZone = 10;//how far until the screen triggers as a drag.
 		dragThisTouch = false;//are they dragging as they touch, or just tapping
@@ -89,12 +90,12 @@ public class MenuScreen implements Screen, InputProcessor{
 
 	}
 	
-	public float getBlockSizeForLv(int mazeSize) {
+	public int getBlockSizeForLv(int mazeSize) {
 		if(mazeSize * normalTileScale > Gdx.graphics.getWidth()) {
-			return Gdx.graphics.getWidth()/mazeSize;
+			return (int)(Gdx.graphics.getWidth()/mazeSize);
 		}
 		else {
-			return Gdx.graphics.getWidth()/normalTileScale;
+			return (int)(Gdx.graphics.getWidth()/normalTileScale);
 		}
 	}
 	
@@ -216,7 +217,14 @@ public class MenuScreen implements Screen, InputProcessor{
 				System.out.println("x" + player.getPos().x + " " + currentMaze.getX() + " " + currentMaze.tileSize);
 				System.out.println("y" + player.getPos().y + " " + currentMaze.getY() + " " + currentMaze.tileSize);
 			}
+			if(keycode == Keys.UP) {
+				System.out.println(player.isOnTrackVert());
+			}
+			if(keycode == Keys.RIGHT) {
+				System.out.println(player.isOnTrackHoriz());
+			}
 		}
+		
 		
 		return false;
 	}
@@ -245,7 +253,7 @@ public class MenuScreen implements Screen, InputProcessor{
 				System.out.println("Didn't drag.");
 				levelSelectDisplay.playerDragged(0);
 				screenTransTool.start("splay", 'r');
-				currentMaze.createMaze(levelSelectDisplay.getNumber(), getBlockSizeForLv(levelSelectDisplay.getNumber()));
+				currentMaze.createMaze(levelSelectDisplay.getNumber(), getBlockSizeForLv(levelSelectDisplay.getNumber()+2));
 				
 				currentMaze.setPosX(Gdx.graphics.getWidth()/2-currentMaze.getTotalSize()/2);
 				currentMaze.setPosY(Gdx.graphics.getHeight()-Gdx.graphics.getWidth()/2-currentMaze.tileSize*currentMaze.getSize()/2);

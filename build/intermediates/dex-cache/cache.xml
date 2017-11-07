@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="C:\Users\Andrew_Miles\.gradle\caches\modules-2\files-2.1\com.badlogicgames.gdx\gdx-freetype\1.9.6\69187cc3c8062f191df435b43671b0e5ffcbf353\gdx-freetype-1.9.6.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="69187cc3c8062f191df435b43671b0e5ffcbf353">
+        <dex dex="C:\Users\Andrew_Miles\Documents\GitHub\aMaze\android\build\intermediates\pre-dexed\debug\gdx-freetype-1.9.6_1a6e630bf33ffcd6246ec7fb43500d1270a809d5.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Andrew_Miles\Documents\GitHub\aMaze\core\build\libs\core-1.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="773d1d39e20b3f324e6f8e46a96030d7551f26a2">
+        <dex dex="C:\Users\Andrew_Miles\Documents\GitHub\aMaze\android\build\intermediates\pre-dexed\debug\core-1.0_d1c9fe4963abf46adbe4aa5159be7cf89be6bd1d.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Andrew_Miles\.gradle\caches\modules-2\files-2.1\com.badlogicgames.gdx\gdx\1.9.6\47d1e9b890e364ec28f128e9bb3b9a12a94c164\gdx-1.9.6.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="047d1e9b890e364ec28f128e9bb3b9a12a94c164">
+        <dex dex="C:\Users\Andrew_Miles\Documents\GitHub\aMaze\android\build\intermediates\pre-dexed\debug\gdx-1.9.6_f4ede6203fada93749493f2e4b965bac14fe7773.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Andrew_Miles\.gradle\caches\modules-2\files-2.1\com.badlogicgames.gdx\gdx-backend-android\1.9.6\57c2831c870743712b808384187ea856e541878f\gdx-backend-android-1.9.6.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="57c2831c870743712b808384187ea856e541878f">
+        <dex dex="C:\Users\Andrew_Miles\Documents\GitHub\aMaze\android\build\intermediates\pre-dexed\debug\gdx-backend-android-1.9.6_afe8d527549e3a3d1e50bb3a4655c3a448efd489.jar" />
+    </item>
+
+</items>

@@ -12,6 +12,7 @@ public class Player {
 	private float tileSize;
 	private Maze maze;
 	private float tempFl;
+	private float distance;
 	private int tempInt;
 	//this is for testing collision at new location.
 	private Vector2 tempPos;
@@ -77,8 +78,23 @@ public class Player {
 		}
 		*/
 	}
+	public boolean isOnTrackVert() {
+		if((position.x - maze.position.x) % maze.tileSize == 0) {
+			return true;
+		}
+		//else
+		return false;
+	}
+	public boolean isOnTrackHoriz() {
+		//if(position.y == maze.getStartingPosY())return true;
+		if((position.y - maze.position.y) % maze.tileSize == 0) {
+			return true;
+		}
+		//else
+		return false;
+	}
 	
-	public void drag() {
+	public void drag_old() {
 		/*
 		 *    Here is the dedicated spot for explaining the math I did to check if I 
 		 * passed the mark. 
@@ -146,13 +162,127 @@ public class Player {
 			this.position.y -= Gdx.input.getDeltaY();
 		}
 	}
+	
+	public void drag() {
+		/*
+		 *    Here is the dedicated spot for explaining the math I did to check if I 
+		 * passed the mark. 
+		 *    So, I first get the player position relative to the maze, using the
+		 * rounding function. for this example, let's say we were going in the left direction,
+		 * but because of a partial collision, we're now going down to match with the 
+		 * corridor we want to go down. Every frame, this method will check if the player y
+		 * position is too low to fit in that corridor. 
+		 *    if((position.y - maze.position.y) < round(position.y - maze.position.y, tileSize)) {
+		 *    or in english
+		 *    if((relative player position to maze) < (the rounded position to find where that corridor is))
+		 * Hopefully that makes sense.
+		 */
+		tempPos.x = position.x - maze.position.x;
+		tempPos.y = position.y - maze.position.y;
+		if(Math.abs(Gdx.input.getDeltaX()) > Math.abs(Gdx.input.getDeltaY())) {
+			//going x direction
+			distance = Gdx.input.getDeltaX();//FIXME set the speed to move
+			if(distance > 0) {//if going right
+				//going right
+				if(isOnTrackHoriz()) {
+					position.x = maze.checkCollisionAndVis(position.x+tileSize, position.y, distance, 'r')-maze.tileSize;
+				}
+				else {//partial collision
+					if(!maze.checkIfWallAt(position.x+tileSize, position.y + tileSize)) {//going up
+						if(position.y + distance > maze.position.y+round(position.y-maze.position.y, tileSize, 1)) {//if really close
+							position.y = maze.position.y+round(position.y-maze.position.y, tileSize, 1);//just move to spot.
+						}
+						else position.y += distance;//if not close enough then just move.
+					}
+					else if(!maze.checkIfWallAt(position.x + tileSize, position.y)) {//going down
+						if(position.y - distance < maze.position.y + round(position.y-maze.position.y, tileSize, -1)) {
+							position.y = maze.position.y+round(position.y-maze.position.y, tileSize, -1);
+						}
+						else position.y -=distance;
+					}
+				}//end partial collision.
+			}//end if going right
+			
+			if(distance < 0) {//if going left
+				if(isOnTrackHoriz()) {
+					position.x = maze.checkCollisionAndVis(position.x, position.y, distance, 'l');
+				}
+				else {//partial collision
+					if(!maze.checkIfWallAt(position.x - tileSize, position.y + tileSize)){//going up
+						if(position.y - distance > maze.position.y + round(tempPos.y, tileSize, 1)) {//if really close
+							position.y = maze.position.y+round(tempPos.y, tileSize, 1);
+						}
+						else position.y -= distance;//if not close enough, move normally
+					}
+					else if(!maze.checkIfWallAt(position.x - tileSize, position.y)) {
+						if(position.y + distance < maze.position.y + round(tempPos.y, tileSize, -1)) {
+							position.y = maze.position.y+round(tempPos.y, tileSize, -1);
+						}
+						else position.y += distance;
+					}
+				}
+			}//end if going left
+		}//end if x axis moving
+		else {
+			//going y direction.
+			distance = Gdx.input.getDeltaY()*-1;
+			if(distance > 0) {
+				//going UP
+				if(isOnTrackVert()) {
+					position.y = maze.checkCollisionAndVis(position.x, position.y+maze.tileSize, distance, 'u')-maze.tileSize;
+				}
+				else {//partial collision
+					if(!maze.checkIfWallAt(position.x, position.y + tileSize)) {//if going left
+						if(position.x - distance < maze.position.x + round(tempPos.x, tileSize, -1)) {
+							position.x = maze.position.x + round(tempPos.x, tileSize, -1);
+						}
+						else position.x -= distance;
+					}
+					else if(!maze.checkIfWallAt(position.x+tileSize, position.y+tileSize))//if going right
+						if(position.x + distance > maze.position.x + round(tempPos.x, tileSize, 1)) {
+							position.x = maze.position.x + round(tempPos.x, tileSize, 1);
+						}
+						else position.x += distance;
+				}
+			}
+			else {
+				//going DOWN
+				if(isOnTrackVert()) {
+					position.y = maze.checkCollisionAndVis(position.x, position.y, distance, 'd');
+				}
+				else {//partial collision
+					if(!maze.checkIfWallAt(position.x, position.y-tileSize)) {
+						if(position.x + distance < maze.position.x + round(tempPos.x, tileSize, -1)) {
+							position.x = maze.position.x + round(tempPos.x, tileSize, -1);
+						}
+						else position.x += distance;
+					}
+					else if(!maze.checkIfWallAt(position.x+tileSize, position.y-tileSize)) {
+						if(position.x - distance > maze.position.x + round(tempPos.x, tileSize, 1)) {
+							position.x = maze.position.x + round(tempPos.x, tileSize, 1);
+						}
+						else position.x -= distance;
+					}
+				}
+			}
+			//this.position.y -= Gdx.input.getDeltaY();
+		}
+	}
+	
+	public int checkCollision(char direction, float distance) {
+		if(direction == 'r') {
+			
+		}
+		return 0;
+	}
+	
 	/**
 	 * checks the collision from the passed direction
 	 * @return 0 = no collision, 1 = total collision, 
 	 * 2 = partial collision to move in the opposite axis POSITIVE direction
 	 * 3 = partial collision to move in the opposite axis NEGATIVE direction
 	 */
-	public int checkCollision(char direction, float distance) {
+	public int checkCollision_old(char direction, float distance) {
 		//1 2
 		//4 8 adding values for each corner
 		tempInt = 0;//each corner added to see what hit.
