@@ -14,6 +14,15 @@ import com.burnt_toast.maze_generator.MazeGenerator;
 
 public class MenuScreen implements Screen, InputProcessor{
 	
+	//TODO LIST
+	//unlocking levels
+	//saving progress
+	//loading bar
+	//ads
+	//online play(usernames?)
+	
+	
+	
 	//camera of the Ortho kind.
 	private OrthographicCamera orthoCam;
 	
@@ -49,10 +58,12 @@ public class MenuScreen implements Screen, InputProcessor{
 	//text for the explanation of how to input
 	private String explText1;
 	private String explText2;//I realize this probably isn't the way to go about it but that's ok.
+	private String lockText;
 	
 	public MenuScreen(MainFrame main){
 		logoImg = new TextureRegion(main.gameTexture, 0, 0, 275, 53);
-		levelSelectDisplay = new FadeNumDisplay("< ~ x ~ >", 5, Gdx.graphics.getWidth()/2-2, MainFrame.clickSound);
+		//I changed the max to 200 because anything bigger was outrageous.
+		levelSelectDisplay = new FadeNumDisplay("< ~ x ~ >", 5, 200, MainFrame.clickSound);
 		
 		dragDeadZone = 10;//how far until the screen triggers as a drag.
 		dragThisTouch = false;//are they dragging as they touch, or just tapping
@@ -60,6 +71,7 @@ public class MenuScreen implements Screen, InputProcessor{
 		
 		explText1 = "Drag left and right to choose a size";
 		explText2 = "Tap the screen to begin";
+		lockText = "You can only play levels you've unlocked.";
 		
 		//camera stuff
 		orthoCam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -76,7 +88,7 @@ public class MenuScreen implements Screen, InputProcessor{
 		//single player play stuff
 		wallPixel = new TextureRegion(MainFrame.gameTexture, 0, 103, 1, 1);
 		currentMaze = new Maze(wallPixel);
-		normalTileScale = 30;
+		normalTileScale = (int)(16f/500f * Gdx.graphics.getWidth());
 		player = new Player(currentMaze);
 		backButton = new Rectangle();
 		//I'm not using the small font tools because I want the boundries to click on it 
@@ -84,17 +96,16 @@ public class MenuScreen implements Screen, InputProcessor{
 		backButton.setWidth(FontTools.getWidthOf("< Save and go back"));
 		backButton.setHeight(FontTools.getHeightOf("< Save and go back"));
 
-
 		
 
 	}
 	
-	public float getBlockSizeForLv(int mazeSize) {
-		if(mazeSize * normalTileScale > Gdx.graphics.getWidth()) {
-			return Gdx.graphics.getWidth()/mazeSize;
+	public int getBlockSizeForLv(int mazeSize) {
+		if((mazeSize) * normalTileScale > Gdx.graphics.getWidth()) {
+			return (int)(Gdx.graphics.getWidth()/mazeSize);
 		}
 		else {
-			return Gdx.graphics.getWidth()/normalTileScale;
+			return (int)(normalTileScale);
 		}
 	}
 	
@@ -169,12 +180,31 @@ public class MenuScreen implements Screen, InputProcessor{
 		if(currentLayouts.contains("single")) {
 			levelSelectDisplay.update();
 		}
+		if(currentLayouts.equals("splay")) {
+			if(currentMaze.translateX(player.getPos().x) == currentMaze.getSize()-2 &&
+					currentMaze.translateY(player.getPos().y) == currentMaze.getSize()-2 &&
+					!screenTransTool.isTransitioning()){
+				MainFrame.completionSound.play();
+				levelSelectDisplay.setNumber(levelSelectDisplay.getNumber()+2);//go up a level
+				levelSelectDisplay.update();
+				screenTransTool.start("splay", 'd');
+				
+			}
+		}
 		
 		//transition stuff
 		if(screenTransTool.isTransitioning()) {
 			if(!(temp = screenTransTool.update()).equals("")) {
 				currentLayouts = temp;
 				MainFrame.changeColor();
+				if(temp.equals("splay")) {
+					currentMaze.createMaze(levelSelectDisplay.getNumber(), getBlockSizeForLv(levelSelectDisplay.getNumber()+2));
+					
+					currentMaze.setPosX(Gdx.graphics.getWidth()/2-currentMaze.getTotalSize()/2);
+					currentMaze.setPosY(Gdx.graphics.getHeight()-Gdx.graphics.getWidth()/2-currentMaze.tileSize*currentMaze.getSize()/2);
+					player.setPos(currentMaze.getStartingPosX(), currentMaze.getStartingPosY());
+					player.setSize(currentMaze.tileSize);
+				}
 			}
 			
 		}
@@ -204,6 +234,10 @@ public class MenuScreen implements Screen, InputProcessor{
 	public void dispose() {
 		
 	}
+	
+	public void save() {
+		
+	}
 
 	@Override
 	public boolean keyDown(int keycode) {
@@ -211,7 +245,19 @@ public class MenuScreen implements Screen, InputProcessor{
 			if(keycode == Keys.BACK) {
 				screenTransTool.start("main", 'l');
 			}
+			if(keycode == Keys.A) {
+				System.out.println(player.checkCollision('r', 1));
+				System.out.println("x" + player.getPos().x + " " + currentMaze.getX() + " " + currentMaze.tileSize);
+				System.out.println("y" + player.getPos().y + " " + currentMaze.getY() + " " + currentMaze.tileSize);
+			}
+			if(keycode == Keys.UP) {
+				System.out.println(player.isOnTrackVert());
+			}
+			if(keycode == Keys.RIGHT) {
+				System.out.println(player.isOnTrackHoriz());
+			}
 		}
+		
 		
 		return false;
 	}
@@ -240,12 +286,7 @@ public class MenuScreen implements Screen, InputProcessor{
 				System.out.println("Didn't drag.");
 				levelSelectDisplay.playerDragged(0);
 				screenTransTool.start("splay", 'r');
-				currentMaze.createMaze(levelSelectDisplay.getNumber(), getBlockSizeForLv(levelSelectDisplay.getNumber()));
 				
-				currentMaze.setPosX(Gdx.graphics.getWidth()/2-currentMaze.getTotalSize()/2);
-				currentMaze.setPosY(Gdx.graphics.getHeight()-Gdx.graphics.getWidth()/2-currentMaze.tileSize*currentMaze.getSize()/2);
-				player.setPos(currentMaze.getStartingPosX(), currentMaze.getStartingPosY());
-				player.setSize(currentMaze.tileSize);
 			}
 			
 			dragDeadCounter = 0;
@@ -255,7 +296,8 @@ public class MenuScreen implements Screen, InputProcessor{
 		touchDownPoint.y = screenY;
 		orthoCam.unproject(touchDownPoint);
 		if(currentLayouts.contains("splay")) {
-			if(backButton.contains(touchDownPoint.x, touchDownPoint.y)) {
+			if(!screenTransTool.isTransitioning() && backButton.contains(touchDownPoint.x, touchDownPoint.y)) {
+				//go back and save
 				screenTransTool.start("single", 'l');
 			}
 		}
@@ -264,11 +306,14 @@ public class MenuScreen implements Screen, InputProcessor{
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		if(screenTransTool.isTransitioning())return false;//if transitioning, no input.
 		if(currentLayouts.contains("single")) {
 			if(Gdx.input.getDeltaX() > 0) {
+				//used to be minus equals but now it's not so it'll go the opposite way
 				dragDeadCounter += MainFrame.distForm(touchDownPoint.x, touchDownPoint.y, screenX, screenY);
 			}
 			else {
+				//used to be plus equals but now it's not so it'll go the oppostie way
 				dragDeadCounter -= MainFrame.distForm(touchDownPoint.x, touchDownPoint.y, screenX, screenY);
 			}
 			
@@ -277,7 +322,8 @@ public class MenuScreen implements Screen, InputProcessor{
 				dragThisTouch = true;
 			}
 			if(dragThisTouch && Math.abs(Gdx.input.getDeltaX()) > 1) {
-				levelSelectDisplay.playerDragged(Gdx.input.getDeltaX());
+				// multiplied by -1 so it'll go the right way.
+				levelSelectDisplay.playerDragged(Gdx.input.getDeltaX() * -1);
 			}
 		}
 		if(currentLayouts.contains("splay")) {

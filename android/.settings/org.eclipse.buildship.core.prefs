@@ -1,11 +1,2 @@
-build.commands=com.android.ide.eclipse.adt.ResourceManagerBuilder,com.android.ide.eclipse.adt.PreCompilerBuilder,org.eclipse.jdt.core.javabuilder,com.android.ide.eclipse.adt.ApkBuilder
-connection.arguments=
-connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
-connection.gradle.user.home=null
-connection.java.home=null
-connection.jvm.arguments=
+#Tue Mar 20 15:44:33 MDT 2018
 connection.project.dir=..
-derived.resources=.gradle,build
-eclipse.preferences.version=1
-natures=org.eclipse.jdt.core.javanature,com.android.ide.eclipse.adt.AndroidNature
-project.path=\:android

@@ -17,7 +17,14 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>assets</name>
+			<type>2</type>
+			<location>C:/Users/Andrew_Miles/Documents/GitHub/test/android/assets</location>
+		</link>
+	</linkedResources>
 </projectDescription>
