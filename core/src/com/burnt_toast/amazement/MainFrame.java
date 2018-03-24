@@ -54,10 +54,13 @@ public class MainFrame extends Game {
 	public FreeTypeFontGenerator generator;
 	public FreeTypeFontParameter parameter;//used for loading fonts
 	
+	public static IActivityRequestHandler handleDude;
+	
 	//Textures
 	public static Texture gameTexture;
 	
-	public MainFrame(){
+	public MainFrame(IActivityRequestHandler handler){
+		handleDude = handler;
 		//load colors
 		playerColor = new Color();
 		textColor = new Color();

@@ -18,6 +18,7 @@ public class FadeNumDisplay
   private String referenceDispStr;
   private float dragSpeed;
   private float dragDeaccel;
+  private int progMax;//the highest level reached (and displayed)
   Sound soundEff;
   
   public FadeNumDisplay(String passDisplayString, int passMinNum, int passMaxNum, Sound passSound)
@@ -47,8 +48,10 @@ public class FadeNumDisplay
   
   public void setNumber(int num)
   {
-    this.currentNum = num;
-    this.displayString = this.referenceDispStr.replaceAll("~", Integer.toString(this.currentNum));
+	  if(num < maxNum) {//cap max possible levels.
+		  this.currentNum = num;
+		  this.displayString = this.referenceDispStr.replaceAll("~", Integer.toString(this.currentNum));
+	  }
   }
   
   public int getNumber()
@@ -86,6 +89,14 @@ public class FadeNumDisplay
     this.maxNum = maxNum;
   }
   
+  public void setProgMax(int passMax) {
+	  this.progMax = passMax;
+  }
+  
+  public int getProgMax()
+  {
+	  return progMax;
+  }
   public void stop()
   {
     this.dragSpeed = 0.0F;
@@ -103,7 +114,7 @@ public class FadeNumDisplay
   
   public void playerDragged(float amountX)
   {
-    if ((this.currentNum == this.maxNum) && (amountX > 0.0F) && (transPlaceholder >= 0.0F)) {
+    if ((this.currentNum == this.progMax) && (amountX > 0.0F) && (transPlaceholder >= 0.0F)) {
       transPlaceholder = 0.0F;
     } else if ((this.currentNum == this.minNum) && (transPlaceholder <= 0.0F) && (amountX < 0.0F)) {
       transPlaceholder = 0.0F;
@@ -114,7 +125,7 @@ public class FadeNumDisplay
     {
       transPlaceholder = -1.0F;
       
-      this.currentNum = (this.currentNum == this.maxNum ? this.maxNum : this.currentNum + 2);
+      this.currentNum = (this.currentNum == this.progMax ? this.progMax : this.currentNum + 2);
       
       this.displayString = this.referenceDispStr.replaceAll("~", Integer.toString(this.currentNum));
       this.soundEff.play(0.3F);

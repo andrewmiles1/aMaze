@@ -138,8 +138,7 @@ public class ScreenTransitionTool {
 				orthoCam.position.x += currentSpeed;
 			}
 		}
-		if(orthoCam.position.y != targetPosition.y) {
-			System.out.println("Really?");
+		if(orthoCam.position.y != targetPosition.y) {//if y isn't there yet.
 			//checking
 			if(Math.abs(orthoCam.position.y - targetPosition.y) < currentSpeed) {
 				//if we're close enough to the target that we'll pass it

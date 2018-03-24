@@ -3,6 +3,7 @@ package com.burnt_toast.amazement;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -60,6 +61,11 @@ public class MenuScreen implements Screen, InputProcessor{
 	private String explText2;//I realize this probably isn't the way to go about it but that's ok.
 	private String lockText;
 	
+	private Preferences prefs;
+	//array to keep track of finished levels:
+	private boolean[] progressionArray;
+	private char[] progStr;//for pulling out and putting into the preferences (it's the raw save state)
+	
 	public MenuScreen(MainFrame main){
 		logoImg = new TextureRegion(main.gameTexture, 0, 0, 275, 53);
 		//I changed the max to 200 because anything bigger was outrageous.
@@ -96,7 +102,20 @@ public class MenuScreen implements Screen, InputProcessor{
 		backButton.setWidth(FontTools.getWidthOf("< Save and go back"));
 		backButton.setHeight(FontTools.getHeightOf("< Save and go back"));
 
-		
+		prefs = Gdx.app.getPreferences("burnt_toast_amazement");//the file the save stuff is saveed in.
+		progressionArray = new boolean[99];//the max levels is 200 so yeah.
+		progStr = new char[99];
+		if(prefs.contains("Progression String")) {//read save state from preferences:
+			progStr = prefs.getString("Progression String").toCharArray();
+			for(int i = 0; i < 99; i++) {
+				if(progStr[i] == '0') {
+					progressionArray[i] = false;
+				}
+				else {
+					progressionArray[i] = true;
+				}
+			}
+		}
 
 	}
 	
@@ -120,6 +139,9 @@ public class MenuScreen implements Screen, InputProcessor{
 
 		//update the cam for showing a screen I guess.
 		orthoCam.update();
+		
+		//TEMP CODE FOR TESTING SO I Don'T HAVE TO DO STUFF
+		progressionArray[0] = true;
 	}
 
 	@Override
@@ -145,21 +167,35 @@ public class MenuScreen implements Screen, InputProcessor{
 		orthoCam.update();
 		
 		//REDRAW
+		//TEST CODE FOR THING:
+		MainFrame.handleDude.printMessage("");
 		MainFrame.batch.begin();
 		if(currentLayouts.contains("single")) {
 			MainFrame.drawingText();
 			MainFrame.gameFont.draw(MainFrame.batch, "aMaze", Gdx.graphics.getWidth()/2-FontTools.getWidthOf("aMaze")/2,
 					Gdx.graphics.getHeight()/4 * 3 + FontTools.getHeightOf("aMaze") + 5); /*5 for a buffer.*/
-			levelSelectDisplay.drawCenteredX(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()/4 * 3);
+			if(progressionArray[0] == true) {//if first level is completed
+				levelSelectDisplay.drawCenteredX(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()/4 * 3);
+				
+				MainFrame.gameFontSmall.draw(MainFrame.batch, explText1,
+						Gdx.graphics.getWidth()/2-FontTools.getWidthOfSmall(explText1)/2,
+						Gdx.graphics.getHeight()/4*3 - FontTools.getHeightOf(levelSelectDisplay.getStr()) - 10);//5 is buffer.
+				MainFrame.gameFontSmall.draw(MainFrame.batch, explText2,
+						Gdx.graphics.getWidth()/2-FontTools.getWidthOfSmall(explText2)/2,
+						Gdx.graphics.getHeight()/4*3 - FontTools.getHeightOfSmall(explText2) - 
+						FontTools.getHeightOf(levelSelectDisplay.getStr()) - 20);//minus 5 for a buffer
+				MainFrame.gameFontSmall.draw(MainFrame.batch, "Scroll up for Multiplayer \\/", 
+						Gdx.graphics.getWidth()/2-FontTools.getWidthOfSmall("Scroll up for Multiplayer \\/")/2,
+						FontTools.getHeightOf("Scroll up for Multiplayer \\/") + 5);//plus 5 for buffer.
+			}
+			else {//if firstr level is not completed.
+				MainFrame.gameFontSmall.draw(MainFrame.batch, "Tap to Begin",
+						Gdx.graphics.getWidth()/2 - FontTools.getWidthOfSmall("Tap to Begin")/2,
+						Gdx.graphics.getHeight()/4 * 3);
+			}
 			//MainFrame.gameFont.draw(MainFrame.batch, explText, FontTools.getWidthOf(explText),
 					//Gdx.graphics.getHeight()/4 * 3 - FontTools.getHeightOf(levelSelectDisplay.getStr()));
-			MainFrame.gameFontSmall.draw(MainFrame.batch, explText1,
-					Gdx.graphics.getWidth()/2-FontTools.getWidthOfSmall(explText1)/2,
-					Gdx.graphics.getHeight()/4*3 - FontTools.getHeightOf(levelSelectDisplay.getStr()) - 10);//5 is buffer.
-			MainFrame.gameFontSmall.draw(MainFrame.batch, explText2,
-					Gdx.graphics.getWidth()/2-FontTools.getWidthOfSmall(explText2)/2,
-					Gdx.graphics.getHeight()/4*3 - FontTools.getHeightOfSmall(explText2) - 
-					FontTools.getHeightOf(levelSelectDisplay.getStr()) - 20);//minus 5 for a buffer
+
 		}
 		if(currentLayouts.contains("splay")) {//single player mode, playing screen
 			//[row - x][column - y] I think.
@@ -173,6 +209,13 @@ public class MenuScreen implements Screen, InputProcessor{
 			MainFrame.drawingPlayer();
 			player.draw();
 		}
+		
+		if(currentLayouts.contains("multi")) {//multi player mode, just MENU
+			MainFrame.drawingText();
+			MainFrame.gameFont.draw(MainFrame.batch, "Multiplayer", Gdx.graphics.getWidth()/2-FontTools.getWidthOf("Multiplayer")/2,
+					Gdx.graphics.getHeight()/4 * 3 + FontTools.getHeightOf("Multiplayer") / 2);
+		}
+		
 		MainFrame.batch.end();
 		//INPUT
 		
@@ -185,9 +228,20 @@ public class MenuScreen implements Screen, InputProcessor{
 					currentMaze.translateY(player.getPos().y) == currentMaze.getSize()-2 &&
 					!screenTransTool.isTransitioning()){
 				MainFrame.completionSound.play();
-				levelSelectDisplay.setNumber(levelSelectDisplay.getNumber()+2);//go up a level
-				levelSelectDisplay.update();
-				screenTransTool.start("splay", 'd');
+				if(levelSelectDisplay.getNumber() == levelSelectDisplay.getMaxNum()){
+					//go back to main menu if we've finished max
+					screenTransTool.start("single", 'l');
+				}
+				else {
+					//go up a level
+					levelSelectDisplay.setNumber(levelSelectDisplay.getNumber()+2);//go up a level
+					levelSelectDisplay.update();
+					if(progressionArray[(levelSelectDisplay.getNumber()+1)/2-4] == false){//if level wasn't finished yet,
+						progressionArray[(levelSelectDisplay.getNumber()+1)/2-4] = true;//mark as finished!
+						levelSelectDisplay.setProgMax(levelSelectDisplay.getNumber());//change display max
+					}
+					screenTransTool.start("splay", 'd');
+				}
 				
 			}
 		}
@@ -232,7 +286,15 @@ public class MenuScreen implements Screen, InputProcessor{
 
 	@Override
 	public void dispose() {
-		
+		for(int i = 0; i < 99; i++) {
+			if(progressionArray[i]) {//if this here is true
+				progStr[i] = '1';//level unlocked in save state
+			}
+			else {//but if not
+				progStr[i] = '0';//then it's not unlocked.
+			}
+		}
+		prefs.flush();
 	}
 	
 	public void save() {
@@ -286,12 +348,16 @@ public class MenuScreen implements Screen, InputProcessor{
 				System.out.println("Didn't drag.");
 				levelSelectDisplay.playerDragged(0);
 				screenTransTool.start("splay", 'r');
-				
+			}
+			else if(dragThisTouch) {//if we did drag this touch
+				if(orthoCam.position.y != Gdx.graphics.getHeight() / 2) {
+					//then we dragged up for multi at least a little bit.
+				}
 			}
 			
 			dragDeadCounter = 0;
 			dragThisTouch = false;
-		}
+		}//end if single
 		touchDownPoint.x = screenX;
 		touchDownPoint.y = screenY;
 		orthoCam.unproject(touchDownPoint);
@@ -325,6 +391,21 @@ public class MenuScreen implements Screen, InputProcessor{
 				// multiplied by -1 so it'll go the right way.
 				levelSelectDisplay.playerDragged(Gdx.input.getDeltaX() * -1);
 			}
+			if(Math.abs(Gdx.input.getDeltaY()) > Math.abs(Gdx.input.getDeltaX()) && !screenTransTool.isTransitioning()) {
+				//if the dragging up and down is bigger then the dragging of left and right, then,
+				if(orthoCam.position.y <= Gdx.graphics.getHeight()/2) {//as long as camera isn't going up
+					orthoCam.position.y += Gdx.input.getDeltaY();//move screen up with drag
+					if(orthoCam.position.y > Gdx.graphics.getHeight()/2)//if we've dragged to far,
+						orthoCam.position.y = Gdx.graphics.getHeight()/2;//then reset.
+				}
+				if(orthoCam.position.y < Gdx.graphics.getHeight()/2 - Gdx.graphics.getHeight()/4) {
+					//transition screen here.
+					screenTransTool.start("multi", 'd');
+				}
+			}
+		}//end if on single menu
+		if(currentLayouts.contains("multi")) {//if in multi menu
+			
 		}
 		if(currentLayouts.contains("splay")) {
 			player.drag();
