@@ -1,5 +1,6 @@
 package com.burnt_toast.amazement.desktop;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -15,12 +16,26 @@ public class DesktopLauncher implements IActivityRequestHandler{
 	private static DatagramSocket listeningSock;
 	private static DatagramSocket sendingSock;
 	private static InetAddress add;
-	private static byte[] buff = new byte[256];
+	private static byte[] buff;
 	private static DatagramPacket listeningPack;
 	private static DatagramPacket sendingPack;
+	private String currCode;
+	
+	private final int LIST_PORT = 5152;
+	private final int SEND_PORT = 5153;
 	
 	public DesktopLauncher() {
 		//initiate all the things here
+/*		try {
+			listeningSock = new DatagramSocket(LIST_PORT);
+			sendingSock = new DatagramSocket(SEND_PORT);
+			buff = new byte[256];
+			listeningPack = new DatagramPacket(buff, buff.length);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 	}
 	
 	public static void main (String[] arg) {
@@ -37,16 +52,16 @@ public class DesktopLauncher implements IActivityRequestHandler{
 	@Override
 	public void printMessage(String msg) {
 		// TODO Auto-generated method stub
-		if(sendingSock == null) {
-			try {
-				sendingSock = new DatagramSocket(5153);
-			} catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}//sending socket.
-		}
-		
-		buff = msg.getBytes();
+		try {
+			buff = msg.getBytes();//convert the msg
+			//get the packet ready
+			sendingPack = new DatagramPacket(buff, buff.length, InetAddress.getLoopbackAddress(), LIST_PORT);
+			//send it off
+			sendingSock.send(sendingPack);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//sending socket.
 		
 		System.out.println("MESSAGE SENT " + System.currentTimeMillis());
 	}
@@ -55,8 +70,15 @@ public class DesktopLauncher implements IActivityRequestHandler{
 	public void startListening() {
 		//start listening to the port
 		try {
-			listeningSock = new java.net.DatagramSocket(5154);
-		} catch (SocketException e) {
+			while(this.currCode != "stop") {//as long as we didn't get anything that said stop
+				System.out.println("TEST");
+				listeningSock.receive(listeningPack);
+				this.currCode = listeningPack.getData().toString();
+				System.out.println("RECEIVED MESSAGE: " + currCode);
+				currCode = "stop";
+			}
+			
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -66,8 +88,13 @@ public class DesktopLauncher implements IActivityRequestHandler{
 
 	@Override
 	public void stopListening() {
-		// TODO Auto-generated method stub
+		printMessage("stop");
 		
+	}
+
+	@Override
+	public String getCode() {
+		return this.currCode;
 	}
 	
 	

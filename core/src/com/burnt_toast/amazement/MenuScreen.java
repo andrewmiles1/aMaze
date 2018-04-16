@@ -1,5 +1,10 @@
 package com.burnt_toast.amazement;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
@@ -66,6 +71,24 @@ public class MenuScreen implements Screen, InputProcessor{
 	private boolean[] progressionArray;
 	private char[] progStr;//for pulling out and putting into the preferences (it's the raw save state)
 	
+	//MULTIPLAYER STUFF
+	private static DatagramSocket listeningSock;
+	private static DatagramSocket sendingSock;
+	private static InetAddress add;
+	private static byte[] buff;
+	private static DatagramPacket listeningPack;
+	private static DatagramPacket sendingPack;
+	private String currCode;
+	private String sendCode;
+	
+	private final int LIST_PORT = 5152;
+	private final int SEND_PORT = 5153;
+	
+	private Thread listThread;
+	private Thread sendThread;//threads for sending and listening,
+	//initialized in the constructor.
+	
+	
 	public MenuScreen(MainFrame main){
 		logoImg = new TextureRegion(main.gameTexture, 0, 0, 275, 53);
 		//I changed the max to 200 because anything bigger was outrageous.
@@ -116,6 +139,71 @@ public class MenuScreen implements Screen, InputProcessor{
 				}
 			}
 		}
+		
+		//MULTIPLAYER INITIALIZATION
+		try {
+		listeningSock = new DatagramSocket(LIST_PORT);
+		sendingSock = new DatagramSocket(SEND_PORT);
+		buff = new byte[256];
+		listeningPack = new DatagramPacket(buff, buff.length);
+		currCode = "NULL";
+		}
+		catch(IOException e) {
+			System.err.println("IO ERROR IN MULTI INITIALIZATION");
+			e.printStackTrace();
+		}
+		
+		
+		//THREADS FOR MULTIPLAYER:
+		listThread = new Thread(new Runnable() {
+			   @Override
+			   public void run() {
+			      // do something important here, asynchronously to the rendering thread
+			      try {
+			    	  while(currCode != "stop") {
+			    		  listeningSock.receive(listeningPack);
+			    		  break;
+			    	  }
+			      }
+			      catch(IOException e) {
+			    	  System.err.println("ERROR IN LISTENING THREAD:" );
+			    	  e.printStackTrace();
+			      }
+			      // post a Runnable to the rendering thread that processes the result
+			      Gdx.app.postRunnable(new Runnable() {
+			         @Override
+			         public void run() {
+			            // process the result, e.g. add it to an Array<Result> field of the ApplicationListener.
+			    		  currCode = new String(listeningPack.getData(), 0, listeningPack.getLength());
+			    		  
+			    		  System.out.println("MESSAGE RECIEVED: " + currCode);
+			         }
+			      });
+			   }
+			});
+		sendThread = new Thread(new Runnable() {
+			   @Override
+			   public void run() {
+			      // do something important here, asynchronously to the rendering thread
+				   try {
+					   buff = sendCode.getBytes();
+					   sendingPack = new DatagramPacket(buff, buff.length, InetAddress.getLoopbackAddress(), LIST_PORT);
+					   sendingSock.send(sendingPack);
+				   }
+				   catch(IOException e) {
+					   System.err.println("ERROR IN SENDING THREAD: ");
+					   e.printStackTrace();
+				   }
+			      // post a Runnable to the rendering thread that processes the result
+			      Gdx.app.postRunnable(new Runnable() {
+			         @Override
+			         public void run() {
+			            // process the result, e.g. add it to an Array<Result> field of the ApplicationListener.
+			            System.out.println("MESSAGE SENT (" + sendCode + ")");
+			         }
+			      });
+			   }
+			});
 
 	}
 	
@@ -168,7 +256,7 @@ public class MenuScreen implements Screen, InputProcessor{
 		
 		//REDRAW
 		//TEST CODE FOR THING:
-		MainFrame.handleDude.printMessage("");
+		
 		MainFrame.batch.begin();
 		if(currentLayouts.contains("single")) {
 			MainFrame.drawingText();
@@ -271,7 +359,7 @@ public class MenuScreen implements Screen, InputProcessor{
 
 	@Override
 	public void pause() {
-		
+		Gdx.graphics.requestRendering();
 	}
 
 	@Override
@@ -399,6 +487,10 @@ public class MenuScreen implements Screen, InputProcessor{
 						orthoCam.position.y = Gdx.graphics.getHeight()/2;//then reset.
 				}
 				if(orthoCam.position.y < Gdx.graphics.getHeight()/2 - Gdx.graphics.getHeight()/4) {
+					//before we transition,
+					listThread.start();
+					sendCode = "tEST jA jA";
+					sendThread.start();
 					//transition screen here.
 					screenTransTool.start("multi", 'd');
 				}

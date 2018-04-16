@@ -59,8 +59,8 @@ public class MainFrame extends Game {
 	//Textures
 	public static Texture gameTexture;
 	
-	public MainFrame(IActivityRequestHandler handler){
-		handleDude = handler;
+	public MainFrame(){
+		handleDude = null;
 		//load colors
 		playerColor = new Color();
 		textColor = new Color();
@@ -108,7 +108,7 @@ public class MainFrame extends Game {
 		this.setScreen(menuScr);
 		
 		batch = new SpriteBatch();
-		
+		Gdx.graphics.setContinuousRendering(true);
 	}
 	/** Converts HSV color sytem to RGB
 	 * 

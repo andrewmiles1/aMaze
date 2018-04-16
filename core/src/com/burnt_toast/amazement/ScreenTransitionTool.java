@@ -121,7 +121,7 @@ public class ScreenTransitionTool {
 				currentSpeed = 0;
 			}
 			currentSpeed += getAccel();
-			System.out.println(currentSpeed);
+			//System.out.println(currentSpeed);
 		}
 		
 		if(orthoCam.position.x != targetPosition.x) {//if x isn't there yet
