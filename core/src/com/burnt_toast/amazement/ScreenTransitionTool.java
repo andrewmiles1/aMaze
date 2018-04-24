@@ -12,6 +12,13 @@ public class ScreenTransitionTool {
 	private char direction;
 	private String transCode;
 	
+	private int temp;
+	
+	//Transition timer:
+	private float totalTime = 1f;//1 second for transition time
+	private float timeTracker;//current time during transition.
+	private float startingDist;//the total distance to target location.
+	
 	//speed and accel
 	private float currentSpeed;
 	private float maxSpeed;
@@ -21,6 +28,7 @@ public class ScreenTransitionTool {
 		this.orthoCam = passCam;
 		targetPosition = new Vector2();
 		maxSpeed = 30;
+				
 	}
 	
 	public void start(String passCode, char passDirect) {
@@ -46,6 +54,8 @@ public class ScreenTransitionTool {
 			break;
 		}
 		moving = true;
+		startingDist = MainFrame.distForm(orthoCam.position, targetPosition);
+		timeTracker = 0;
 	}
 	
 	/**
@@ -87,7 +97,7 @@ public class ScreenTransitionTool {
 					//and we're back to the origin, 0,0
 					moving = false;
 					return "";//we done, no more work here.
-				}
+				}//end if reached origin
 				else {
 					//we've reached the change screen point.
 					//we have to move the camera to the other
@@ -115,16 +125,23 @@ public class ScreenTransitionTool {
 					targetPosition.x = Gdx.graphics.getWidth()/2;
 					targetPosition.y = Gdx.graphics.getHeight()/2;
 					return transCode;
-				}
+				}//end if reached target but not origin
 			}
 			if(currentSpeed < 0) {
 				currentSpeed = 0;
 			}
-			currentSpeed += getAccel();
+			//currentSpeed += getAccel();
+			currentSpeed = getSpeed();
 			//System.out.println(currentSpeed);
-		}
+		}//end if moving
 		
-		if(orthoCam.position.x != targetPosition.x) {//if x isn't there yet
+		//different stuff here: 
+		//ok so we're going to use a timer
+		
+		
+		
+		//OLD CODE BELOW:
+/*		if(orthoCam.position.x != targetPosition.x) {//if x isn't there yet
 			if(Math.abs(orthoCam.position.x - targetPosition.x) < currentSpeed) {
 				//if we're close enough to the target that we'll pass it
 				orthoCam.position.x = targetPosition.x;//then set it.
@@ -154,7 +171,7 @@ public class ScreenTransitionTool {
 				orthoCam.position.y += currentSpeed;
 			}
 		}
-		orthoCam.update();
+		orthoCam.update();*/
 		return "";
 	}
 	
@@ -212,6 +229,55 @@ public class ScreenTransitionTool {
 			return (float) Math.abs(0.5 * currentSpeed + 1);
 		}
 		else return 0;//I don't want the speed deacceling if it's too far.
+	}
+	
+	private float getSpeed() {
+		// (1/Gdx.graphics.getHeight()) *
+		//MainFrame.distForm(orthoCam.position.(x or y), targetPosition.(x or y));
+		//This is the formula to see where we're at x is the distance:
+		// sin(0.5 * Math.pi * x); (1/500 * distance is the distance converted from 0 to 1.)
+//		System.out.println("X is: " + (1f/500f * MainFrame.distForm(orthoCam.position, targetPosition)));
+//		System.out.println("f value is: " + (maxSpeed * Math.cos(0.5 * Math.PI * 
+//					(1f/500f * MainFrame.distForm(orthoCam.position, targetPosition)))));
+//		if(direction == 'u' || direction == 'd') {
+//			
+//			return (float)(maxSpeed * (Math.cos(0.5 * Math.PI * 
+//					(1f/500f * MainFrame.distForm(orthoCam.position, targetPosition)))));
+//		}
+//		else if(direction == 'l' || direction == 'r') {
+//			return (float)(maxSpeed * (Math.cos(0.5 * Math.PI *
+//					(1f/500f * MainFrame.distForm(orthoCam.position, targetPosition)))));
+//		}
+//		else return 0;//should never happen but syntax requires it.
+//		
+		//ABOVE CODE IS OLD
+		
+		// 1/totalTime * currentTime is x.
+		//then what you return you multiply by the starting distance to get
+		//the distance you should be from the target distance.
+		
+		// ok ok so still get distance but we've got better equations
+		
+		float returnSpeed = 0;
+		//BIOINFORMATICS
+		System.out.println("X is: " + (1f/500f * MainFrame.distForm(orthoCam.position, targetPosition)));
+		System.out.println("f value is: " + (maxSpeed * Math.cos(0.5 * Math.PI * 
+					(1f/500f * MainFrame.distForm(orthoCam.position, targetPosition)))));
+		if(direction == 'u' || direction == 'd') {
+			returnSpeed = (float)(maxSpeed * (Math.cos(0.5 * Math.PI * 
+					(1f/500f * MainFrame.distForm(orthoCam.position, targetPosition)))));
+		}
+		else if(direction == 'l' || direction == 'r') {
+			returnSpeed = (float)(maxSpeed * (Math.cos(0.5 * Math.PI *
+					(1f/500f * MainFrame.distForm(orthoCam.position, targetPosition)))));
+		}
+		if(returnSpeed < 0.05f) return 0.05f;
+		
+		return returnSpeed;
+		
+		
+		
+		
 	}
 	/**
 	 * @return if we're currently transitioning

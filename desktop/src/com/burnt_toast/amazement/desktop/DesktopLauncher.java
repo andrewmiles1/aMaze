@@ -46,7 +46,8 @@ public class DesktopLauncher implements IActivityRequestHandler{
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 10 * 50;
 		config.height = 16 * 50;
-		new LwjglApplication(new MainFrame(application), config);
+		new LwjglApplication(new MainFrame(), config);
+		
 	}
 
 	@Override
